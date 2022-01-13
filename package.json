@@ -1,0 +1,23 @@
+{
+  "name": "auxilium-contracts",
+  "version": "1.0.0",
+  "description": "Smart Contracts for Auxilium Fund",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AuxiliumFund/auxilium-contracts.git"
+  },
+  "keywords": [
+    "Solidity",
+    "Ethereum"
+  ],
+  "author": "Camden Grieh",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AuxiliumFund/auxilium-contracts/issues"
+  },
+  "homepage": "https://github.com/AuxiliumFund/auxilium-contracts#readme"
+}
