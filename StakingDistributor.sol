@@ -323,11 +323,11 @@ contract Distributor is Ownable {
     
     /* ====== CONSTRUCTOR ====== */
 
-    constructor( address _treasury, address _time, uint32 _epochLength, uint32 _nextEpochAuxl ) {        
+    constructor( address _treasury, address _auxl, uint32 _epochLength, uint32 _nextEpochAuxl ) {        
         require( _treasury != address(0) );
         treasury = ITreasury(_treasury);
-        require( _time != address(0) );
-        AUXL = IERC20(_time);
+        require( _auxl != address(0) );
+        AUXL = IERC20(_auxl);
         epochLength = _epochLength;
         nextEpochAuxl = _nextEpochAuxl;
     }
