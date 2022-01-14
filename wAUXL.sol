@@ -619,8 +619,8 @@ contract wAUXL is ERC20 {
     using LowGasSafeMath for uint;
 
     IAUXL public immutable AUXL;
-    event Wrap(address indexed recipient, uint256 amountMemo, uint256 amountWmemo);
-    event UnWrap(address indexed recipient,uint256 amountWmemo, uint256 amountMemo);
+    event Wrap(address indexed recipient, uint256 amountSAuxl, uint256 amountWmemo);
+    event UnWrap(address indexed recipient,uint256 amountWmemo, uint256 amountSAuxl);
 
     constructor( address _AUXL ) ERC20( 'Wrapped AUXL', 'wAUXL' ) {
         require( _AUXL != address(0) );

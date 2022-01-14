@@ -491,7 +491,7 @@ contract Ownable is OwnableData {
     }
 }
 
-interface IMemo is IERC20 {
+interface ISAuxl is IERC20 {
     function rebase( uint256 ohmProfit_, uint epoch_) external returns (uint256);
 
     function circulatingSupply() external view returns (uint256);
@@ -518,10 +518,10 @@ contract AuxlStaking is Ownable {
     using LowGasSafeMath for uint256;
     using LowGasSafeMath for uint32;
     using SafeERC20 for IERC20;
-    using SafeERC20 for IMemo;
+    using SafeERC20 for ISAuxl;
 
     IERC20 public immutable Auxl;
-    IMemo public immutable Memories;
+    ISAuxl public immutable sAuxl;
 
     struct Epoch {
         uint number;
@@ -549,15 +549,15 @@ contract AuxlStaking is Ownable {
     
     constructor ( 
         address _Auxl, 
-        address _Memories, 
+        address _sAuxl, 
         uint32 _epochLength,
         uint _firstEpochNumber,
         uint32 _firstEpochAuxl
     ) {
         require( _Auxl != address(0) );
         Auxl = IERC20(_Auxl);
-        require( _Memories != address(0) );
-        Memories = IMemo(_Memories);
+        require( _sAuxl != address(0) );
+        sAuxl = ISAuxl(_sAuxl);
         
         epoch = Epoch({
             length: _epochLength,
@@ -590,12 +590,12 @@ contract AuxlStaking is Ownable {
 
         warmupInfo[ _recipient ] = Claim ({
             deposit: info.deposit.add( _amount ),
-            gons: info.gons.add( Memories.gonsForBalance( _amount ) ),
+            gons: info.gons.add( sAuxl.gonsForBalance( _amount ) ),
             expiry: epoch.number.add( warmupPeriod ),
             lock: false
         });
         
-        Memories.safeTransfer( address(warmupContract), _amount );
+        sAuxl.safeTransfer( address(warmupContract), _amount );
         emit LogStake(_recipient, _amount);
         return true;
     }
@@ -608,7 +608,7 @@ contract AuxlStaking is Ownable {
         Claim memory info = warmupInfo[ _recipient ];
         if ( epoch.number >= info.expiry && info.expiry != 0 ) {
             delete warmupInfo[ _recipient ];
-            uint256 amount = Memories.balanceForGons( info.gons );
+            uint256 amount = sAuxl.balanceForGons( info.gons );
             warmupContract.retrieve( _recipient,  amount);
             emit LogClaim(_recipient, amount);
         }
@@ -620,7 +620,7 @@ contract AuxlStaking is Ownable {
     function forfeit() external {
         Claim memory info = warmupInfo[ msg.sender ];
         delete warmupInfo[ msg.sender ];
-        uint memoBalance = Memories.balanceForGons( info.gons );
+        uint memoBalance = sAuxl.balanceForGons( info.gons );
         warmupContract.retrieve( address(this),  memoBalance);
         Auxl.safeTransfer( msg.sender, info.deposit);
         emit LogForfeit(msg.sender, memoBalance, info.deposit);
@@ -643,7 +643,7 @@ contract AuxlStaking is Ownable {
         if ( _trigger ) {
             rebase();
         }
-        Memories.safeTransferFrom( msg.sender, address(this), _amount );
+        sAuxl.safeTransferFrom( msg.sender, address(this), _amount );
         Auxl.safeTransfer( msg.sender, _amount );
         emit LogUnstake(msg.sender, _amount);
     }
@@ -653,7 +653,7 @@ contract AuxlStaking is Ownable {
         @return uint
      */
     function index() external view returns ( uint ) {
-        return Memories.index();
+        return sAuxl.index();
     }
 
     /**
@@ -662,7 +662,7 @@ contract AuxlStaking is Ownable {
     function rebase() public {
         if( epoch.endAuxl <= uint32(block.timestamp) ) {
 
-            Memories.rebase( epoch.distribute, epoch.number );
+            sAuxl.rebase( epoch.distribute, epoch.number );
 
             epoch.endAuxl = epoch.endAuxl.add32( epoch.length );
             epoch.number++;
@@ -672,7 +672,7 @@ contract AuxlStaking is Ownable {
             }
 
             uint balance = contractBalance();
-            uint staked = Memories.circulatingSupply();
+            uint staked = sAuxl.circulatingSupply();
 
             if( balance <= staked ) {
                 epoch.distribute = 0;
